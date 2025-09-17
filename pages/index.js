@@ -1,71 +1,71 @@
-import { useCallback, useEffect, useState } from 'react'
-import Button from '../components/Button'
-import ClickCount from '../components/ClickCount'
-import styles from '../styles/home.module.css'
+import { useState } from "react";
 
-function throwError() {
-  console.log(
-    // The function body() is not defined
-    document.body()
-  )
-}
+export default function Home() {
+  const [task, setTask] = useState("");
+  const [todos, setTodos] = useState([]);
 
-function Home() {
-  const [count, setCount] = useState(0)
-  const increment = useCallback(() => {
-    setCount((v) => v + 1)
-  }, [setCount])
+  const addTodo = () => {
+    if (!task.trim()) return;
+    setTodos([...todos, { id: Date.now(), text: task, done: false }]);
+    setTask("");
+  };
 
-  useEffect(() => {
-    const r = setInterval(() => {
-      increment()
-    }, 1000)
+  const toggleTodo = (id) => {
+    setTodos(
+      todos.map((t) =>
+        t.id === id ? { ...t, done: !t.done } : t
+      )
+    );
+  };
 
-    return () => {
-      clearInterval(r)
-    }
-  }, [increment])
+  const removeTodo = (id) => {
+    setTodos(todos.filter((t) => t.id !== id));
+  };
 
   return (
-    <main className={styles.main}>
-      <h1>Fast Refresh Demo</h1>
-      <p>
-        Fast Refresh is a Next.js feature that gives you instantaneous feedback
-        on edits made to your React components, without ever losing component
-        state.
-      </p>
-      <hr className={styles.hr} />
-      <div>
-        <p>
-          Auto incrementing value. The counter won't reset after edits or if
-          there are errors.
-        </p>
-        <p>Current value: {count}</p>
-      </div>
-      <hr className={styles.hr} />
-      <div>
-        <p>Component with state.</p>
-        <ClickCount />
-      </div>
-      <hr className={styles.hr} />
-      <div>
-        <p>
-          The button below will throw 2 errors. You'll see the error overlay to
-          let you know about the errors but it won't break the page or reset
-          your state.
-        </p>
-        <Button
-          onClick={(e) => {
-            setTimeout(() => document.parentNode(), 0)
-            throwError()
-          }}
-        >
-          Throw an Error
-        </Button>
-      </div>
-      <hr className={styles.hr} />
-    </main>
-  )
-}
+    <div style={{ maxWidth: 500, margin: "40px auto", fontFamily: "sans-serif" }}>
+      <h1>📝 Todo List</h1>
 
-export default Home
+      <div style={{ display: "flex", gap: "10px" }}>
+        <input
+          type="text"
+          value={task}
+          onChange={(e) => setTask(e.target.value)}
+          placeholder="Enter a task"
+          style={{ flex: 1, padding: "8px" }}
+        />
+        <button onClick={addTodo} style={{ padding: "8px 12px" }}>
+          Add
+        </button>
+      </div>
+
+      <ul style={{ marginTop: "20px", padding: 0, listStyle: "none" }}>
+        {todos.map((t) => (
+          <li
+            key={t.id}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "10px",
+              background: "#f5f5f5",
+              padding: "10px",
+              borderRadius: "6px",
+            }}
+          >
+            <span
+              onClick={() => toggleTodo(t.id)}
+              style={{
+                cursor: "pointer",
+                textDecoration: t.done ? "line-through" : "none",
+              }}
+            >
+              {t.text}
+            </span>
+            <button onClick={() => removeTodo(t.id)}>❌</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
